@@ -1,0 +1,81 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        ParameterLabels:
+          default: "IAM Configuration"
+        Parameters:
+          - Groupname
+          - Grouppath
+          - Username
+          - Password
+          - Policy
+    ParameterLabels:
+      Groupname:
+        default: "Specify groupname"
+      Username:
+        default: "Specify username"
+      Password:
+        default: "Specify password"
+
+Parameters:
+  Groupname:
+    Type: String
+    Default: "EPAM-lecturers"
+    Description: "Default groupname"
+
+  Grouppath:
+    Type: String
+    Default: "/EPAM_lecturers/"
+    Description: "Default grouppath"
+
+  Username:
+    Type: String
+    Default: "Aleksandr"
+    Description: "Default username"
+ 
+  Password:
+    Type: String
+    Default: "P@$$w0rd"
+    Description: "Default password"
+
+  Policy:
+    Type: String
+    Default: "homework-policy-lecturers"
+    Description: "Default policy for group EPAM_lecturers"
+
+Resources:
+  CreateGroup:
+    Type: AWS::IAM::Group
+    Properties: 
+      GroupName: !Ref Groupname
+
+  CreateUser:
+    Type: AWS::IAM::User
+    Properties: 
+      UserName: !Ref Username
+
+  GenerateAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName:
+        !Ref Username 
+    DependsOn: CreateUser
+
+  AddUserToGroup:
+    Type: AWS::IAM::UserToGroupAddition
+    Properties:
+      GroupName: !Ref Groupname
+      Users:
+        - !Ref Username
+    DependsOn:
+      - CreateGroup
+      - CreateUser
+
+Outputs:
+  GeneratedAccessKey:
+    Value:
+      !Ref GenerateAccessKey
+  GeneratedSecretKey:
+    Value: !GetAtt GenerateAccessKey.SecretAccessKey
